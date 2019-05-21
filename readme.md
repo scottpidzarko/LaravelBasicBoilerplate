@@ -2,6 +2,11 @@
 
 [![Latest Stable Version](https://poser.pugx.org/rappasoft/laravel-5-boilerplate/v/stable)](https://packagist.org/packages/rappasoft/laravel-5-boilerplate)
 [![Latest Unstable Version](https://poser.pugx.org/rappasoft/laravel-5-boilerplate/v/unstable)](https://packagist.org/packages/rappasoft/laravel-5-boilerplate)
+
+<!---
+TODO Update to my own StyleCI and CircleCI badges
+-->
+
 [![StyleCI](https://styleci.io/repos/30171828/shield?style=plastic)](https://styleci.io/repos/30171828/shield?style=plastic)
 [![CircleCI](https://circleci.com/gh/rappasoft/laravel-5-boilerplate/tree/master.svg?style=svg)](https://circleci.com/gh/rappasoft/laravel-5-boilerplate/tree/master)
 
@@ -60,10 +65,22 @@
   * Entire application split between frontend/backend
   * Localization Throughout
 
-### Installation
+### Required packages for Development
+
+[Composer](https://getcomposer.org)
+[NPM](https://www.npmjs.com/get-npm)
+
+MySQL: There's a variety of ways to install it. If you're downloading it from Oracle, the community version is just fine. Many Linux distributions have drop-in package replacements for MySQL like MariaDB.
+[PHPUnit](https://phpunit.de/getting-started/phpunit-8.html): choose to install it globally on your system or with Composer
+
+### Optional
+
+[Yarn (highly recommended!)](https://yarnpkg.com/en/docs/install)
+
+### Installation/Setup for Development
 
 1. Download
-Download the files above and place on your server. (This project was developed on Laravel Homestead and I highly recommend you use either that or Laravel Valet, to get the optimal server configuration and no errors through installation.)
+Download the files above and place on your development machine. (This project was developed on Laravel Homestead and I highly recommend you use either that or Laravel Valet, to get the optimal server configuration and no errors through installation.)
 
 2. Environment Files
 This package ships with a .env.example file in the root of the project.
@@ -73,7 +90,7 @@ You must rename this file to just .env
 Note: Make sure you have hidden files shown on your system.
 
 3. Composer
-Laravel project dependencies are managed through the PHP Composer tool. The first step is to install the depencencies by navigating into your project in terminal and typing this command:
+Laravel project dependencies are managed through the PHP Composer tool. The first step is to install the dependencies by navigating into your project in terminal and typing this command:
 
 ```console
 foo@bar:~$ composer install
@@ -182,3 +199,9 @@ The administrator credentials are:
 **Password**: secret
 
 You will be automatically redirected to the backend. If you changed these values in the seeder prior, then obviously use the ones you updated to.
+
+### Deployment
+
+#### Digital Ocean
+
+I use Digital Ocean and Docker for Deployment.
