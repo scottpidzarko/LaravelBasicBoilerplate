@@ -67,11 +67,14 @@ TODO Update to my own StyleCI and CircleCI badges
 
 ### Required packages for Development
 
+This project uses laradock for it's development environment. Laradock is a git submodule of this project, so it will be cloned when you clone this repository.
+
+This project requires the following, which come with Laradock already:
+
 [Composer](https://getcomposer.org)
 [NPM](https://www.npmjs.com/get-npm)
 
-MySQL: There's a variety of ways to install it. If you're downloading it from Oracle, the community version is just fine. Many Linux distributions have drop-in package replacements for MySQL like MariaDB.
-[PHPUnit](https://phpunit.de/getting-started/phpunit-8.html): choose to install it globally on your system or with Composer
+MySQL or your favourite SQL engine. Instructions below for MySQL, but Laradock supports MSSQL, MariaDB, Postgre SQL, etc. If you choose anything other than MariaDB/MySQL you're on your own.
 
 ### Optional
 
@@ -80,20 +83,73 @@ MySQL: There's a variety of ways to install it. If you're downloading it from Or
 ### Installation/Setup for Development
 
 1. Download
-Download the files above and place on your development machine. (This project was developed on Laravel Homestead and I highly recommend you use either that or Laravel Valet, to get the optimal server configuration and no errors through installation.)
 
-2. Environment Files
-This package ships with a .env.example file in the root of the project.
+```
+git clone https://github.com/scottpidzarko/LaravelBasicBoilerplate.git
+```
 
-You must rename this file to just .env
+or if you have an SSH Key setup:
 
-Note: Make sure you have hidden files shown on your system.
+```
+git clone git@github.com:scottpidzarko/LaravelBasicBoilerplate.git
+```
+
+After the file has downloaded, enter the project directories' laradock/ folder:
+
+```
+cd LaravelBasicBoilerplate/laradock
+```
+
+2. Environment File - Laradock
+This package ships with a .env.example file in the laradock/ folder.
+
+Duplicate this file, and rename to just .env;
+
+```
+cp .env.example .env
+```
+
+Note: If you cannot see the file, make sure you have hidden files shown on your system.
+
+Use your favourite text editor to edit the file. We're going to alter a few lines. It's a somewhat large config file, so searching for the variable names we are going to set will be helpful to speed up this process:
+
+MYSQL - set to
+APACHE_WEB_ROOT - set to
+
+
+3. Environment File - Project
+
+This package also ships with a .env.example file in the root folder of the project. Like before, duplicate and rename the file:
+
+```
+cp .env.example .env
+```
+
+Use your favourite text editor to edit this file as well. It's a little smaller.
+
+
+APi_KEY - LEAVE BLANK - it will be filled later on in this process with Artisan.
+
+MYSQL - set to
+
+
+4. Spin up the docker virtual machine
+
+Once you're sure you have your config files set, lets build our docker container using _docker compose_:
+
+
 
 3. Composer
-Laravel project dependencies are managed through the PHP Composer tool. The first step is to install the dependencies by navigating into your project in terminal and typing this command:
+
+Composer manages the Laravel Project's dependencies.
+
+login
+```
+
+```
 
 ```console
-foo@bar:~$ composer install
+root@docker-machine $ composer install
 ```
 
 4. NPM/Yarn
