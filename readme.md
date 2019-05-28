@@ -82,21 +82,23 @@ MySQL or your favourite SQL engine. Instructions below for MySQL, but Laradock s
 
 ### Installation/Setup for Development
 
+This guide is based on http://laradock.io/guides/#Digital-Ocean and https://www.digitalocean.com/community/tutorials/how-to-set-up-laravel-nginx-and-mysql-with-docker-compose and Rappasoft’s setup guide for their boilerplate
+
 1. Download
 
-```
+```console
 git clone https://github.com/scottpidzarko/LaravelBasicBoilerplate.git
 ```
 
 or if you have an SSH Key setup:
 
-```
+```console
 git clone git@github.com:scottpidzarko/LaravelBasicBoilerplate.git
 ```
 
 After the file has downloaded, enter the project directories' laradock/ folder:
 
-```
+```console
 cd LaravelBasicBoilerplate/laradock
 ```
 
@@ -105,7 +107,7 @@ This package ships with a .env.example file in the laradock/ folder.
 
 Duplicate this file, and rename to just .env;
 
-```
+```console
 cp .env.example .env
 ```
 
@@ -113,79 +115,116 @@ Note: If you cannot see the file, make sure you have hidden files shown on your 
 
 Use your favourite text editor to edit the file. We're going to alter a few lines. It's a somewhat large config file, so searching for the variable names we are going to set will be helpful to speed up this process:
 
-MYSQL - set to
-APACHE_WEB_ROOT - set to
+```console
+
+APP_CODE_PATH_HOST=../ #This is the root folder of your laravel project
+DATA_PATH_HOST= #This is fine to leave as default - this is the folder where any persistent data is stored
+#
+COMPOSE_PATH_SEPERATOR=: #Set according to your OS
+
+WORKSPACE_TIMEZONE=America/Vancouver #(or whatever yours is)
+WORKSPACE_INSTALL_NPM_GULP=false
+PHP_FPM_INSTALL_PHPREDIS=false
+WORKSPACE_INSTALL_PHPREDIS=false
+```
+
+Make sure it’s mysql 8.0.3
+Change docker host IP to your host computers ipv4 ADDR
+
+Check docker_sync strategy for your OS
+Check compose_convert_windows paths for your OS
+Check apache_document_root -> should be /var/www/public
+Make sure mysql creds are matching what you want
+
 
 
 3. Environment File - Project
 
 This package also ships with a .env.example file in the root folder of the project. Like before, duplicate and rename the file:
 
-```
+```console
 cp .env.example .env
 ```
 
 Use your favourite text editor to edit this file as well. It's a little smaller.
 
+Enter your MySQL credentials you set in the laradock .env file:
 
-APi_KEY - LEAVE BLANK - it will be filled later on in this process with Artisan.
+```console
+DB_CONNECTION=mysql
+#keep this as 'mysql' if you're running with laradock's docker-compose
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=default #whatever you defined
+DB_USERNAME=default #whatever you defined
+DB_PASSWORD=secret #whatever you defined
+```
 
-MYSQL - set to
+Change the other environment variables
 
+```console
+APP_KEY=  #LEAVE BLANK - it will be filled later on in this process with Artisan.
+APP_TIMEZONE=America/Vancouver #whatever you defined in laradock .env file
+APP_LOCALE=en #default is fine for most websites unless you are developing for an end-user outside North America
+APP_LOCALE_PHP=en_US #default is fine for most people
+APP_DEBUG=true #false on production
+```
+Every other default should be OK to leave alone for most users, or can be tweaked later
 
 4. Spin up the docker virtual machine
 
-Once you're sure you have your config files set, lets build our docker container using _docker compose_:
+Once you're sure you have your config files set, lets build and start our docker container using _docker compose_:
 
+```console
+docker-compose up -d mysql apache2
+```
 
+The -d flag starts the machine in the background once they are built. This step can take a while so go have a coffee or something.
+
+You can see your docker container with
+
+```console
+docker ps
+```
+
+You should see an apache2 machine, a mysql machine, your workspace machine all linked together with the docker network machine like this:
+
+<!--TODO: Insert picture -->
+
+If something went wrong in the build and the machine isn't there, or if you need to change something in your laradock.env and have to rebuild, just run:
+
+```console
+docker-compose build apache2 mysql
+```
+Then after your build is successful, re-run:
+
+```console
+docker-compose up -d apache2 MySQL
+```
 
 3. Composer
 
 Composer manages the Laravel Project's dependencies.
 
 login
+```console
+docker-compose exec workspace bash
 ```
 
+You are now in your workspace machine, where the php process lives. You will be dropped into your web root:
+
 ```
+root@docker-machine:/var/www $ composer install
+```
+
+This step can take a bit but it's not as long as building the docker image. After it's successful move on to the next step.
+
+4. Artisan Commands
+
+We are going to so is set the key that Laravel will use when doing encryption.
 
 ```console
-root@docker-machine $ composer install
-```
-
-4. NPM/Yarn
-In order to install the Javascript packages for frontend development, you will need the Node Package Manager, and optionally the Yarn Package Manager by Facebook (Recommended)
-
-If you only have NPM installed you have to run this command from the root of the project:
-
-```console
-foo@bar:~$ npm install
-```
-
-If you have Yarn installed, run this instead from the root of the project:
-
-```console
-foo@bar:~$ yarn
-```
-
-5. Create Database
-You must create your database on your server and on your .env file update the following lines:
-
-```console
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=homestead
-DB_USERNAME=homestead
-DB_PASSWORD=secret
-```
-
-Change these lines to reflect your new database settings.
-
-6. Artisan Commands
-The first thing we are going to so is set the key that Laravel will use when doing encryption.
-
-```console
-foo@bar:~$ php artisan key:generate
+root@docker-machine:/var/www $ php artisan key:generate
 ```
 
 You should see a green message stating your key was successfully generated. As well as you should see the APP_KEY variable in your .env file reflected.
@@ -199,6 +238,42 @@ foo@bar:~$ php artisan migrate
 ```
 
 You should see a message for each table migrated, if you don't and see errors, than your credentials are most likely not correct.
+
+5. Set local directory permissions:
+
+On Windows, in Powershell:
+
+First exit the docker virtual environment
+/var/www# exit
+
+PS LaravelBasicBoilerplate\laradock> cd ..
+
+PS LaravelBasicBoilerplate\laradock> .\storage\ /grant Users:F
+
+PS LaravelBasicBoilerplate\laradock> .\bootstrap\cache\ /grant Users:F
+
+On Linux, in bash:
+
+$ cd .. && chmod 777 -R ./storage ./bootstrap/cache
+
+6. NPM/Yarn
+<!-- TODO determine if I have to run this step -->
+
+In order to install the Javascript packages for frontend development, you will need the Node Package Manager, and optionally the Yarn Package Manager by Facebook (Recommended)
+
+If you only have NPM installed you have to run this command from the root of the project:
+
+```console
+root@docker-machine:~$ npm install
+```
+
+If you have Yarn installed, run this instead from the root of the project:
+
+```console
+foo@bar:~$ yarn
+```
+
+#
 
 We are now going to set the administrator account information. To do this you need to navigate to this file and change the name/email/password of the Administrator account.
 
