@@ -313,7 +313,7 @@ If you only have NPM installed you have to run this command from the root of the
 root@docker-machine:~$ npm install
 ```
 
-If you have Yarn installed, run this instead from the root of the project. DO NOT RUN BOTH:
+If you have Yarn installed, run this instead from the root of the project. DO NOT RUN BOTHphp :
 
 ```console
 foo@bar:~$ yarn
