@@ -102,6 +102,12 @@ After the file has downloaded, enter the project directories' laradock/ folder:
 cd LaravelBasicBoilerplate/laradock
 ```
 
+Pull the laradock folder:
+
+```console
+git submodule update --init --recursive
+```
+
 2. Environment File - Laradock
 This package ships with a .env.example file in the laradock/ folder.
 
@@ -115,18 +121,26 @@ Note: If you cannot see the file, make sure you have hidden files shown on your 
 
 Use your favourite text editor to edit the file. We're going to alter a few lines. It's a somewhat large config file, so searching for the variable names we are going to set will be helpful to speed up this process:
 
+App code path: this is where your Laravel project root folder is. If you're following this guide exactly, it will be one level up from the laradock folder
 ```console
+APP_CODE_PATH_HOST=../
+```
 
-APP_CODE_PATH_HOST=../ #This is the root folder of your laravel project
-DATA_PATH_HOST= #This is fine to leave as default - this is the folder where any persistent data is stored
-#
-COMPOSE_PATH_SEPERATOR=: #Set according to your OS
+Data path for your host: this is where any data persistent to the virtual machine stays - your database and machine logs get put here. Later you can choose not to save the database, but for now it goes here.
 
+```console
+DATA_PATH_HOST= ~/.laradock/data
+
+Other more self-explanatory variables to set:
+
+```console
+COMPOSE_PATH_SEPERATOR=: #or ; on Windows
 WORKSPACE_TIMEZONE=America/Vancouver #(or whatever yours is)
 WORKSPACE_INSTALL_NPM_GULP=false
 PHP_FPM_INSTALL_PHPREDIS=false
 WORKSPACE_INSTALL_PHPREDIS=false
 ```
+
 
 Make sure it’s mysql 8.0.3
 Change docker host IP to your host computers ipv4 ADDR
