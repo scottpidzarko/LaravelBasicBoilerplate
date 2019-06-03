@@ -109,7 +109,8 @@ git submodule update --init --recursive
 ```
 
 2. Environment File - Laradock
-This package ships with a .env.example file in the laradock/ folder.
+
+This package ships with a .env.example file in the ~laradock/~ folder.
 
 Duplicate this file, and rename to just .env;
 
@@ -117,7 +118,7 @@ Duplicate this file, and rename to just .env;
 cp .env.example .env
 ```
 
-Note: If you cannot see the file, make sure you have hidden files shown on your system.
+Note: If you cannot see the file in Windows explorer, make sure you have hidden files shown on your system.
 
 Use your favourite text editor to edit the file. We're going to alter a few lines. It's a somewhat large config file, so searching for the variable names we are going to set will be helpful to speed up this process:
 
@@ -130,27 +131,53 @@ Data path for your host: this is where any data persistent to the virtual machin
 
 ```console
 DATA_PATH_HOST= ~/.laradock/data
+```
 
 Other more self-explanatory variables to set:
 
 ```console
-COMPOSE_PATH_SEPERATOR=: #or ; on Windows
-WORKSPACE_TIMEZONE=America/Vancouver #(or whatever yours is)
 WORKSPACE_INSTALL_NPM_GULP=false
 PHP_FPM_INSTALL_PHPREDIS=false
 WORKSPACE_INSTALL_PHPREDIS=false
 ```
 
+For MySQL, make sure our settings are to our liking for authentication and database names:
 
-Make sure it’s mysql 8.0.3
-Change docker host IP to your host computers ipv4 ADDR
+```console
+MYSQL_DATABASE=default
+MYSQL_USER=default
+MYSQL_PASSWORD=secret
+MYSQL_ROOT_PASSWORD=root
+```
 
-Check docker_sync strategy for your OS
-Check compose_convert_windows paths for your OS
-Check apache_document_root -> should be /var/www/public
-Make sure mysql creds are matching what you want
+You can leave most of these alone for development, but in production these credentials should be changed.
 
+Also make sure it’s mysql 8.0.3 -  there's currently a change in MySQL 8.0.4 or higher that changes the default authentication parameters in MySQL, and PHP libraries that Laravel relies on do not yet fully support them:
 
+```console
+MYSQL_VERSION=8.0.3 #make sure this does NOT say latest!
+```
+
+Docker host IP: set to your LAN address for development. For production this changes depending on how it is configured. This is the address you normally have to append to your hosts file.
+
+```console
+DOCKER_HOST_IP=192.168.1.X
+```
+
+Apache Document root: this variable needs to be changed to Laravel's public/ folder:
+
+```console
+APACHE_DOCUMENT_ROOT=/var/www/public
+```
+
+Finally there are some OS-dependent variables and one variable that depends on your server's location (or local development machine). Set the following variables according to the commented instructions in the file:
+
+```console
+COMPOSE_PATH_SEPERATOR
+DOCKER_SYNC_STRATEGY=
+WORKSPACE_TIMEZONE=
+COMPOSE_CONVERT_WINDOWS_PATHS=
+```
 
 3. Environment File - Project
 
@@ -166,7 +193,6 @@ Enter your MySQL credentials you set in the laradock .env file:
 
 ```console
 DB_CONNECTION=mysql
-#keep this as 'mysql' if you're running with laradock's docker-compose
 DB_HOST=mysql
 DB_PORT=3306
 DB_DATABASE=default #whatever you defined
@@ -182,7 +208,13 @@ APP_TIMEZONE=America/Vancouver #whatever you defined in laradock .env file
 APP_LOCALE=en #default is fine for most websites unless you are developing for an end-user outside North America
 APP_LOCALE_PHP=en_US #default is fine for most people
 APP_DEBUG=true #false on production
+APP_URL=http://localhost #if you have a dummy project.test domain or something like that, you should change this
 ```
+Finally, set the administrator account information. You can leave this as the default for testing if you want but should probably change it for production:
+
+```console
+
+
 Every other default should be OK to leave alone for most users, or can be tweaked later
 
 4. Spin up the docker virtual machine
@@ -201,9 +233,7 @@ You can see your docker container with
 docker ps
 ```
 
-You should see an apache2 machine, a mysql machine, your workspace machine all linked together with the docker network machine like this:
-
-<!--TODO: Insert picture -->
+You should see an apache2 machine, a mysql machine, your workspace machine and a php-fpm machine. If you followed this guide exactly, these machines will be prefixed by "laradock_", so the machines will be called "laradock_workspace", "laradock_mysql", etc.
 
 If something went wrong in the build and the machine isn't there, or if you need to change something in your laradock.env and have to rebuild, just run:
 
@@ -216,7 +246,7 @@ Then after your build is successful, re-run:
 docker-compose up -d apache2 MySQL
 ```
 
-3. Composer
+5. Composer
 
 Composer manages the Laravel Project's dependencies.
 
@@ -227,13 +257,13 @@ docker-compose exec workspace bash
 
 You are now in your workspace machine, where the php process lives. You will be dropped into your web root:
 
-```
+```console
 root@docker-machine:/var/www $ composer install
 ```
 
 This step can take a bit but it's not as long as building the docker image. After it's successful move on to the next step.
 
-4. Artisan Commands
+6. Artisan Commands
 
 We are going to so is set the key that Laravel will use when doing encryption.
 
@@ -253,7 +283,7 @@ foo@bar:~$ php artisan migrate
 
 You should see a message for each table migrated, if you don't and see errors, than your credentials are most likely not correct.
 
-5. Set local directory permissions:
+7. Set local directory permissions:
 
 On Windows, in Powershell:
 
@@ -270,7 +300,9 @@ On Linux, in bash:
 
 $ cd .. && chmod 777 -R ./storage ./bootstrap/cache
 
-6. NPM/Yarn
+At this point you should be able to type in "localhost" into your browser and see your site serving pages, although some functions that are npm dependent or yarn dependent might not work yet.
+
+8. NPM/Yarn
 <!-- TODO determine if I have to run this step -->
 
 In order to install the Javascript packages for frontend development, you will need the Node Package Manager, and optionally the Yarn Package Manager by Facebook (Recommended)
@@ -281,27 +313,27 @@ If you only have NPM installed you have to run this command from the root of the
 root@docker-machine:~$ npm install
 ```
 
-If you have Yarn installed, run this instead from the root of the project:
+If you have Yarn installed, run this instead from the root of the project. DO NOT RUN BOTH:
 
 ```console
 foo@bar:~$ yarn
 ```
 
-#
+9. Admin/Dummy account setup & DB seed:
 
-We are now going to set the administrator account information. To do this you need to navigate to this file and change the name/email/password of the Administrator account.
+Open database\seeds\Auth\UserTableSeeder.php in the project, and adjust as you need. Feel free to delete the dummy accounts, but leave at least one account so you can access the backend of the site!
 
-You can delete the other dummy users, but do not delete the administrator account or you will not be able to access the backend.
-
-Now seed the database with:
+Seed the database with:
 
 ```console
 foo@bar:~$ php artisan db:seed
 ```
 
+This adds the administrator account information in the database defined in your laravel project .env file
+
 You should get a message for each file seeded, you should see the information in your database tables.
 
-7. NPM Run '\*'
+10. NPM Run '\*'
 Now that you have the database tables and default rows, you need to build the styles and scripts.
 
 These files are generated using Laravel Mix, which is a wrapper around many tools, and works off the webpack.mix.js in the root of the project.
@@ -318,7 +350,7 @@ You will see a lot of information flash on the screen and then be provided with 
 
 At this point you are done, you should be able to hit the project in your local browser and see the project, as well as be able to log in with the administrator and view the backend.
 
-8. PHPUnit
+11. PHPUnit Tests
 After your project is installed, make sure you run the test suite to make sure all of the parts are working correctly. From the root of your project run:
 
 ```console
@@ -327,17 +359,17 @@ foo@bar:~$ phpunit
 
 You will see a dot(.) appear for each of the hundreds of tests, and then be provided with the amount of passing tests at the end. There should be no failures with a fresh install.
 
-9. Storage:link
+12. Storage:link
 After your project is installed you must run this command to link your public storage folder for user avatar uploads:
 
 ```console
 foo@bar:~$  php artisan storage:link
 ```
 
-10. Login
+13. Login
 After your project is installed and you can access it in a browser, click the login button on the right of the navigation bar.
 
-The administrator credentials are:
+The (default) administrator credentials are:
 
 **Username**: admin@admin.com
 
@@ -349,4 +381,8 @@ You will be automatically redirected to the backend. If you changed these values
 
 #### Digital Ocean
 
-I use Digital Ocean and Docker for Deployment.
+COMING SOON
+
+<!-- I use Digital Ocean and Docker for Deployment.  -->
+
+<!-- TODO -->
