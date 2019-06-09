@@ -21,10 +21,10 @@ class UserTableSeeder extends Seeder
 
         // Add the master administrator, user id of 1
         User::create([
-            'first_name'        => 'Admin',
-            'last_name'         => 'Istrator',
-            'email'             => 'admin@admin.com',
-            'password'          => 'secret',
+            'first_name'        => env("ADMIN_FIRST_NAME"),
+            'last_name'         => env("ADMIN_LAST_NAME"),
+            'email'             => env("ADMIN_EMAIL"),
+            'password'          => env("ADMIN_PASSWORD"),
             'confirmation_code' => md5(uniqid(mt_rand(), true)),
             'confirmed'         => true,
         ]);
@@ -46,6 +46,7 @@ class UserTableSeeder extends Seeder
             'confirmation_code' => md5(uniqid(mt_rand(), true)),
             'confirmed'         => true,
         ]);
+        */
 
         $this->enableForeignKeys();
     }
