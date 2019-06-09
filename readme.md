@@ -265,6 +265,7 @@ This step can take a bit but it's not as long as building the docker image. Afte
 
 6. Artisan Commands
 
+
 We are going to so is set the key that Laravel will use when doing encryption.
 
 ```console
@@ -298,7 +299,7 @@ PS LaravelBasicBoilerplate\laradock> .\bootstrap\cache\ /grant Users:F
 
 On Linux, in bash:
 
-$ cd .. && chmod 777 -R ./storage ./bootstrap/cache
+$ cd .. && chmod -R 777 storage/ bootstrap/cache/
 
 At this point you should be able to type in "localhost" into your browser and see your site serving pages, although some functions that are npm dependent or yarn dependent might not work yet.
 
